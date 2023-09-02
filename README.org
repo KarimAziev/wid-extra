@@ -29,7 +29,11 @@ Extra widgets and enhancers.
              :repo "KarimAziev/wid-extra"
              :type git
              :host github)
-  :config (wid-extra-override-color-widget))
+  :demand t
+  :after (wid-edit)
+  :config
+  (when (fboundp 'wid-extra-add-color-completions)
+    (wid-extra-add-color-completions)))
 #+end_src
 
 ** Manual installation

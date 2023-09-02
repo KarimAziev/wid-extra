@@ -146,37 +146,30 @@ Return nil if NAME does not designate a valid color."
           ((not (string-equal prefix completion))
            (insert-and-inherit (substring completion (length prefix)))))))
 
-(defun wid-extra-override-color-widget ()
-  "Define a color widget with editable field and additional functionalities."
-  (put 'color 'widget-type
-       (cons 'editable-field
-             (list
-              :format
-              "%{%t%}: %v (%{sample%})\n"
-              :size
-              (1+
-               (apply #'max
-                      13
-                      (mapcar
-                       #'length
-                       (defined-colors))))
-              :tag      "Color"
-              :match
-              'wid-extra-color-match
-              :validate
-              'wid-extra-color-validate
-              :value    ""
-              :complete
-              'wid-extra-color-complete
-              :sample-face-get
-              'widget-color-sample-face-get
-              :notify
-              'wid-extra-color-notify
-              :action   'widget-color-action)))
-  (put 'color 'widget-documentation (purecopy "A wid-extra color widget.")))
+(defun wid-extra-plist-remove (keys plist)
+  "Remove KEYS and values from PLIST."
+  (let* ((result (list 'head))
+         (last result))
+    (while plist
+      (let* ((key (pop plist))
+             (val (pop plist))
+             (new (and (not (memq key keys))
+                       (list key val))))
+        (when new
+          (setcdr last new)
+          (setq last (cdr new)))))
+    (cdr result)))
 
+(defun wid-extra-add-color-completions ()
+  "Add annotated completions to color widget."
+  (let* ((defaults (get 'color 'widget-type))
+         (type (car defaults))
+         (pl (cdr defaults)))
+    (setq pl (plist-put pl :complete 'wid-extra-color-complete))
+    (setq pl (wid-extra-plist-remove '(:completions)
+                                     pl))
+    (put 'color 'widget-type (cons type pl))))
 
- 
 
 (provide 'wid-extra)
 ;;; wid-extra.el ends here
