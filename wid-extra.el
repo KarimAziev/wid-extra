@@ -38,14 +38,12 @@
 (declare-function color-rgb-to-hex "shr-color")
 
 (defun wid-extra-color-match (_widget value)
-  "Non-nil if VALUE is a defined color or an RGB hex string.
-\(`:match' function for `color' widget.\)"
+  "Non-nil if VALUE is a defined color or an RGB hex string."
   (and (stringp value)
        (color-defined-p value)))
 
 (defun wid-extra-color-validate (widget)
-  "Return nil if WIDGET's value is a valid color value.
-\(`:validate' function for `color' widget.\)"
+  "Return nil if WIDGET's value is a valid color value."
   (let ((value  (widget-value widget)))
     (unless (wid-extra-color-match widget value)
       (widget-put widget :error (format "Invalid color: `%S'" value))
@@ -54,7 +52,14 @@
 
 
 (defun wid-extra-color-notify (widget child &optional event)
-  "Update WIDGET's sample, and notify its PARENT."
+  "Update the color of a WIDGETs overlay in response to an EVENT.
+
+Argument WIDGET is a WIDGET object that is being manipulated.
+
+Argument CHILD is a CHILD WIDGET of the main WIDGET.
+
+Optional argument EVENT is an EVENT that triggers the function, with no default
+value."
   (let* ((ovly       (widget-get widget :sample-overlay))
          (new-color  (widget-apply widget :sample-face-get)))
     (overlay-put ovly 'face new-color))
@@ -62,7 +67,12 @@
 
 
 (defun wid-extra-read-color (&optional prefix)
-  "Show a list of all supported colors with annotations."
+  "Prompt user to select a color, displaying color names and their hex values.
+
+Optional argument PREFIX: This is a string type argument.
+If not provided, its default value is nil.
+It is used to filter the list of colors based on whether they start with a
+specific PREFIX."
   (interactive)
   (let* ((colors
           (if (and prefix (string-prefix-p "#" prefix))
@@ -138,20 +148,32 @@ Return nil if NAME does not designate a valid color."
 
 (defun wid-extra-override-color-widget ()
   "Define a color widget with editable field and additional functionalities."
-  (define-widget 'color 'editable-field
-    "A color widget (with sample)."
-    :format   "%{%t%}: %v (%{sample%})\n"
-    :size     (1+ (apply #'max
-                         13     ; Longest RGB hex string
-                         (mapcar #'length (defined-colors))))
-    :tag      "Color"
-    :match    'wid-extra-color-match
-    :validate 'wid-extra-color-validate
-    :value    ""
-    :complete 'wid-extra-color-complete
-    :sample-face-get 'widget-color-sample-face-get
-    :notify   'wid-extra-color-notify
-    :action   'widget-color-action))
+  (put 'color 'widget-type
+       (cons 'editable-field
+             (list
+              :format
+              "%{%t%}: %v (%{sample%})\n"
+              :size
+              (1+
+               (apply #'max
+                      13
+                      (mapcar
+                       #'length
+                       (defined-colors))))
+              :tag      "Color"
+              :match
+              'wid-extra-color-match
+              :validate
+              'wid-extra-color-validate
+              :value    ""
+              :complete
+              'wid-extra-color-complete
+              :sample-face-get
+              'widget-color-sample-face-get
+              :notify
+              'wid-extra-color-notify
+              :action   'widget-color-action)))
+  (put 'color 'widget-documentation (purecopy "A wid-extra color widget.")))
 
 
  
