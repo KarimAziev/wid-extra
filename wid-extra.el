@@ -66,16 +66,38 @@ value."
   (widget-default-notify widget child event))
 
 
-(defun wid-extra-read-color (&optional prefix)
-  "Prompt user to select a color, displaying color names and their hex values.
+(defun wid-extra-read-color (prompt &optional predicate require-match
+                                    initial-input hist def inherit-input-method)
+  "PROMPT user to select a color, displaying color names and hex values.
 
-Optional argument PREFIX: This is a string type argument.
-If not provided, its default value is nil.
-It is used to filter the list of colors based on whether they start with a
-specific PREFIX."
+Argument PROMPT is a string that is displayed to the user as a PROMPT.
+
+Optional argument PREDICATE is a function that filters the list of possible
+completions.
+It defaults to nil.
+
+Optional argument REQUIRE-MATCH is a boolean that determines whether the user is
+required to choose a valid completion.
+It defaults to nil.
+
+Optional argument INITIAL-INPUT is a string that is pre-filled in the input
+field.
+It defaults to nil.
+
+Optional argument HIST is a symbol representing the history list to use for the
+input field.
+It defaults to nil.
+
+Optional argument DEF is a string that is used as the default value if the user
+enters nothing.
+It defaults to nil.
+
+Optional argument INHERIT-INPUT-METHOD is a boolean that determines whether to
+inherit the current input method for the input field.
+It defaults to nil."
   (interactive)
   (let* ((colors
-          (if (and prefix (string-prefix-p "#" prefix))
+          (if (and initial-input (string-prefix-p "#" initial-input))
               (delete nil
                       (mapcar (lambda (cell)
                                 (let* ((name (car cell))
@@ -100,7 +122,7 @@ specific PREFIX."
           (lambda (color)
             (let ((fg (list :foreground color))
                   (blank (make-string (- len (length color)) ?\s)))
-              (concat " " blank (concat ;
+              (concat " " blank (concat
                                  (propertize blank-back 'face (list :background
                                                                     color))
                                  " "
@@ -117,13 +139,14 @@ specific PREFIX."
                                                                            color)
                                                         ",")
                                              'face fg)))))))
-    (completing-read "Candidates: "
+    (completing-read prompt
                      (lambda (str pred action)
                        (if (eq action 'metadata)
                            `(metadata
                              (annotation-function . ,formatter))
                          (complete-with-action action colors str pred)))
-                     nil nil prefix)))
+                     predicate require-match initial-input hist def
+                     inherit-input-method)))
 
 (defun wid-extra-color--name-to-hex (name)
   "Return hexadecimal RGB value of color with NAME.
@@ -139,7 +162,7 @@ Return nil if NAME does not designate a valid color."
   (let* ((prefix      (buffer-substring-no-properties
                        (widget-field-start widget)
                        (point)))
-         (completion (wid-extra-read-color prefix)))
+         (completion (wid-extra-read-color "Color: " nil nil prefix)))
     (cond ((string= completion prefix)
            (message "Sole completion")
            nil)
