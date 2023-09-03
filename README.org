@@ -2,7 +2,7 @@
 
 * About
 
-Extra widgets and enhancers.
+Enhancers for Emacs widgets.
 
 * Table of Contents                                       :TOC_2_gh:QUOTE:
 #+BEGIN_QUOTE
@@ -11,6 +11,7 @@ Extra widgets and enhancers.
 - [[#installation][Installation]]
   - [[#with-use-package-and-straightel][With use-package and straight.el]]
   - [[#manual-installation][Manual installation]]
+  - [[#functions][Functions]]
 #+END_QUOTE
 
 * Requirements
@@ -50,3 +51,6 @@ Add the downloaded directory to the load path:
 (add-to-list 'load-path "~/.emacs.d/wid-extra/")
 (require 'wid-extra)
 #+end_src
+** Functions
+
+- =wid-extra-add-color-completions= - Add annotated completions to color widget.
