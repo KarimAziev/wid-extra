@@ -6,7 +6,7 @@
 ;; URL: https://github.com/KarimAziev/wid-extra
 ;; Version: 0.1.0
 ;; Keywords: extensions
-;; Package-Requires: ((emacs "24.1"))
+;; Package-Requires: ((emacs "25.1"))
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
 ;; This file is NOT part of GNU Emacs.
@@ -192,6 +192,23 @@ Return nil if NAME does not designate a valid color."
     (setq pl (wid-extra-plist-remove '(:completions)
                                      pl))
     (put 'color 'widget-type (cons type pl))))
+
+
+(defun wid-extra-toggle-hide-all-widgets (&rest _args)
+  "Toggle the visibility of all custom widgets in the buffer.
+This function is supposed to use as advice:
+
+\\=(advice-add \\='custom-buffer-create-internal
+              :after #\\='wid-extra-toggle-hide-all-widgets)."
+  (when (fboundp 'custom-toggle-hide-all-widgets)
+    (let ((ov (seq-find (lambda (o)
+                          (eq 'custom-visibility
+                              (car (overlay-get o 'button))))
+                        (overlays-in (point-min)
+                                     (point-max)))))
+      (when ov
+        (goto-char (overlay-start ov))
+        (custom-toggle-hide-all-widgets)))))
 
 
 (provide 'wid-extra)
